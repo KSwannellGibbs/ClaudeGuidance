@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Give Feedback — Claude Guidance Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E0F10;
+    --card:#1A1B1E;
+    --card-2:#1E2024;
+    --border:#2C2E33;
+    --border-soft:rgba(255,255,255,0.08);
+    --orange:#FF8956;
+    --orange-dim:rgba(255,137,86,0.14);
+    --purple:#CA8DFF;
+    --purple-dim:rgba(202,141,255,0.14);
+    --muted:#9A9A9A;
+    --dark-muted:#666666;
+    --white:#FFFFFF;
+    --green:#7ECB7E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--white);font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 500,'FILL' 0,'GRAD' 0;font-size:20px;vertical-align:middle;}
+  .wrap{max-width:640px;margin:0 auto;padding:56px 28px 60px;}
+
+  .back-link{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:28px;}
+  .back-link .material-symbols-outlined{font-size:15px;}
+  .back-link:hover{color:var(--orange);}
+
+  .icon-badge{width:52px;height:52px;border-radius:14px;background:var(--purple-dim);color:var(--purple);
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+  .icon-badge .material-symbols-outlined{font-size:26px;}
+  h1{font-size:30px;margin:0 0 10px;font-weight:800;letter-spacing:-0.01em;}
+  .sub{color:var(--muted);font-size:14.5px;line-height:1.6;margin:0 0 32px;}
+
+  form{display:flex;flex-direction:column;gap:18px;}
+  label{font-size:13px;font-weight:700;margin-bottom:6px;display:block;}
+  input[type=text], select, textarea{
+    width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;color:var(--white);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;
+  }
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--purple);}
+  textarea{resize:vertical;min-height:120px;}
+
+  button{background:var(--purple);color:var(--bg);font-weight:700;font-size:14.5px;border:none;
+    padding:14px 20px;border-radius:12px;cursor:pointer;margin-top:6px;}
+  button:hover{opacity:0.92;}
+  button:disabled{opacity:0.6;cursor:not-allowed;}
+
+  .success{display:none;text-align:center;padding:40px 20px;}
+  .success .material-symbols-outlined{font-size:44px;color:var(--green);margin-bottom:14px;}
+  .success h2{margin:0 0 8px;font-size:22px;}
+  .success p{color:var(--muted);font-size:14px;margin:0 0 24px;}
+  .success a{color:var(--orange);font-weight:700;text-decoration:none;}
+
+  .error-msg{display:none;color:#E8756A;font-size:13px;margin-top:-8px;}
+
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--border-soft);}
+  .footnote{font-size:11.5px;color:var(--dark-muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back-link" href="index.html"><span class="material-symbols-outlined">arrow_back</span>Back to Claude Guidance Hub</a>
+
+  <div id="formView">
+    <div class="icon-badge"><span class="material-symbols-outlined">forum</span></div>
+    <h1>Give feedback</h1>
+    <p class="sub">Spotted something missing, out of date, or wrong? Want a topic covered that isn't here yet? Let us know below.</p>
+
+    <form id="feedbackForm" name="feedback" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="feedback" />
+      <p style="display:none;"><label>Don't fill this out: <input name="bot-field" /></label></p>
+
+
+      <div>
+        <label for="message">Your message</label>
+        <textarea id="message" name="message" required placeholder="Tell us what you'd like to share..."></textarea>
+      </div>
+
+      <div>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required placeholder="So we know who to follow up with">
+      </div>
+
+      <div class="error-msg" id="errorMsg">Something went wrong sending that — please try again, or reach Katie directly.</div>
+
+      <button type="submit" id="submitBtn">Send feedback</button>
+    </form>
+  </div>
+
+  <div class="success" id="successView">
+    <span class="material-symbols-outlined">check_circle</span>
+    <h2>Thanks — got it</h2>
+    <p>Your feedback has been sent. We read every submission and use it to keep this guidance current.</p>
+    <a href="index.html">Back to Claude Guidance Hub</a>
+  </div>
+
+  <footer>
+    <p class="footnote">Feedback goes straight to the team maintaining this guide — nothing is public.</p>
+  </footer>
+
+</div>
+
+<script>
+  const form = document.getElementById('feedbackForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const errorMsg = document.getElementById('errorMsg');
+
+  function encode(data) {
+    return Object.keys(data)
+      .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+      .join('&');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    errorMsg.style.display = 'none';
+
+    const formData = new FormData(form);
+    const payload = {};
+    formData.forEach((value, key) => { payload[key] = value; });
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encode(payload)
+    })
+      .then(() => {
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+      })
+      .catch(() => {
+        errorMsg.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send feedback';
+      });
+  });
+</script>
+
+</body>
+</html>
